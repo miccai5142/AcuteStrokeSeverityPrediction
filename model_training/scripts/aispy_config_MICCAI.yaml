@@ -1,0 +1,99 @@
+# aispycore configuration
+
+data:
+  target_col: "mRS_Label"
+  image_col: "path"
+  id_col: "id"
+  batch_size: 10
+  num_parallel_calls: 4
+  cache: false
+
+augmentation:
+  enabled: false
+  transforms: []
+
+model:
+  backbone: "BinarySFCN"
+  task_type: "binary_classification"
+  dropout: 0.3
+  weight_decay: 1.0e-6
+  backbone_weights: null
+  prediction_range: null
+
+training:
+  epochs: 200
+  learning_rate: 1.0e-4
+  seed: null
+
+  # Class weighting to address imbalance. Package needs to be updated to calculate class weightings based on train set during runtime. Not used in current study.
+  class_weight: null # {0: 1.0, 1: 1.5}
+
+  optimizer: "sgd"
+  loss_fn: "binary_crossentropy"
+  metrics: ["accuracy"]
+
+  # Tracked every epoch via ValidationMetricsCallback.
+  custom_val_metrics: ["val_balanced_accuracy", "val_f1"]
+
+  # --- Early stopping ---
+  use_early_stopping: true
+  early_stopping_metric: "val_loss"
+  early_stopping_mode: "min"
+  early_stopping_patience: 15
+  early_stopping_min_delta: 0.0
+
+  # --- LR reduction on plateau ---
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 1.0e-7
+
+  use_stepwise_lr: false
+  log_epoch_metrics: true
+
+  trainer_type: "standard"
+  trainer_kwargs: {}
+
+cross_validation:
+  n_folds: 4
+  n_repeats: 1
+  stratify_cols: ['mRS', 'lesion_volume']
+  priority_weights: null
+  val_size: 0.3
+  n_inner_folds: 4
+  final_val_split: 0.3
+  binning_threshold: 10
+
+tuning:
+  enabled: true
+  # Uncomment to skip tuning and use pre-tuned hyperparameters instead:
+  # pretuned_hyperparameters:
+  #   - model.dropout: 0.55          # fold 0
+  #     training.learning_rate: 0.0001873
+  #     model.weight_decay: 0.0
+  #   - model.dropout: 0.55          # fold 1
+  #     training.learning_rate: 0.0002828
+  #     model.weight_decay: 0.0002
+  #   - model.dropout: 0.1           # fold 2
+  #     training.learning_rate: 0.00014
+  #     model.weight_decay: 0.00095
+  #   - model.dropout: 0.45          # fold 3
+  #     training.learning_rate: 3.8275703375199456e-05
+  #     model.weight_decay: 0.00074
+
+  backend: "keras_tuner"
+  max_trials: 30
+  objective: "val_loss"
+  objective_direction: "min"
+  tuning_epochs: 10
+  trial_early_stopping_patience: 4      
+  trial_early_stopping_min_delta: 0.0 # cuts trials making negligible progress
+
+  last_n_epochs: 4
+  improvement_weight: 0.0   # pure mean — rank by mean objective over last N epochs only
+  max_direction_changes: 2
+  exclude_increasing_loss: true
+
+output:
+  save_best_only: true
+  monitor_metric: "val_loss"
+  monitor_mode: "min"

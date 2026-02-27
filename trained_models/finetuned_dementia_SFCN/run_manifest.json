@@ -1,0 +1,106 @@
+{
+  "timestamp_utc": "",
+  "cli_args": {
+    "csv_file": "SOOP_mRS.csv",
+    "output_dir": "MICCAI_DementiaSFCN_mRS_1/repeat_5",
+    "config": "aispy_config_MICCAI.yaml",
+    "model_type": "BinarySFCN",
+    "weights": "dementia-2024",
+    "scheme": "kfold",
+    "repeat_number": 5,
+    "seed": 1562,
+    "seed_used": 1562
+  },
+  "config": {
+    "data": {
+      "target_col": "mRS_Label",
+      "image_col": "path",
+      "id_col": "id",
+      "batch_size": 10,
+      "num_parallel_calls": 4,
+      "cache": false
+    },
+    "augmentation": {
+      "enabled": false,
+      "transforms": []
+    },
+    "model": {
+      "backbone": "BinarySFCN",
+      "task_type": "binary_classification",
+      "dropout": 0.3,
+      "weight_decay": 1e-06,
+      "backbone_weights": "dementia-2024",
+      "prediction_range": null
+    },
+    "training": {
+      "epochs": 200,
+      "learning_rate": 0.0001,
+      "seed": 1562,
+      "optimizer": "sgd",
+      "loss_fn": "binary_crossentropy",
+      "metrics": [
+        "accuracy"
+      ],
+      "custom_val_metrics": [
+        "val_balanced_accuracy",
+        "val_f1"
+      ],
+      "use_early_stopping": true,
+      "early_stopping_metric": "val_loss",
+      "early_stopping_mode": "min",
+      "early_stopping_min_delta": 0.0,
+      "early_stopping_patience": 15,
+      "reduce_lr_patience": 5,
+      "reduce_lr_factor": 0.5,
+      "min_lr": 1e-07,
+      "use_stepwise_lr": false,
+      "log_epoch_metrics": true,
+      "trainer_type": "standard",
+      "trainer_kwargs": {}
+    },
+    "cross_validation": {
+      "n_folds": 4,
+      "n_repeats": 1,
+      "stratify_cols": [
+        "mRS",
+        "lesion_volume"
+      ],
+      "priority_weights": null,
+      "val_size": 0.3,
+      "n_inner_folds": 4,
+      "final_val_split": 0.3,
+      "binning_threshold": 10
+    },
+    "tuning": {
+      "enabled": true,
+      "backend": "keras_tuner",
+      "max_trials": 30,
+      "objective": "val_loss",
+      "tuning_epochs": 10,
+      "last_n_epochs": 4,
+      "improvement_weight": 0.0,
+      "exclude_increasing_loss": true,
+      "objective_direction": "min",
+      "trial_early_stopping_patience": 4,
+      "trial_early_stopping_min_delta": 0.0,
+      "max_direction_changes": 2,
+      "pretuned_hyperparameters": null
+    },
+    "output": {
+      "save_best_only": true,
+      "monitor_metric": "val_loss",
+      "monitor_mode": "min"
+    }
+  },
+  "software_versions": {
+    "tensorflow": "2.6.2",
+    "keras": "2.6.0",
+    "numpy": "1.19.5",
+    "pandas": "1.4.4",
+    "sklearn": "1.6.1",
+    "nibabel": "5.1.0",
+    "iterative-stratification": "0.1.9",
+    "pyment-public": "2.0"
+  },
+  "python_version": "3.9.15 | packaged by conda-forge | (main, Nov 22 2022, 08:45:29) \n[GCC 10.4.0]"
+}
